@@ -165,6 +165,13 @@ h1 {
     color: #a29bfe;
 }
 
+.label-suffix {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.55);
+    font-weight: 400;
+}
+.field.computed .label-suffix { color: rgba(162,155,254,0.85); }
+
 .badge {
     font-size: 0.68rem;
     padding: 0.15rem 0.5rem;
@@ -347,7 +354,7 @@ input:focus {
 
     <div class="card">
         <div class="field" id="field-total">
-            <label><span data-i18n="labelTotal">Полная сумма (100%)</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <label><span data-i18n="labelTotal">Полная сумма (100%)</span><span class="label-suffix" id="labelTotalSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
                 <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="total" placeholder="напр. 12400" step="any" data-i18n-ph="phTotal">
                 <span class="unit-label" data-for="total"></span>
@@ -363,7 +370,7 @@ input:focus {
         </div>
 
         <div class="field" id="field-percent">
-            <label><span data-i18n="labelPercent">Процент от полной суммы</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <label><span data-i18n="labelPercent">Процент от полной суммы</span><span class="label-suffix" id="labelPercentSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
                 <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="percent" placeholder="напр. 30" step="any" data-i18n-ph="phPercent">
                 <span class="unit-label" data-for="percent">%</span>
@@ -385,7 +392,9 @@ const I18N = {
         labelTotal: 'Полная сумма (100%)',
         labelPart: 'Часть от полной суммы',
         labelPercent: 'Процент от полной суммы',
-        ofSize: 'размером',
+        sufTotal: (part, pc) => ` где ${part} является ${pc}%`,
+        sufPart: (pc, total) => ` ${pc}% от ${total}`,
+        sufPercent: (part, total) => ` ${part} из ${total}`,
         badge: 'Результат',
         reset: 'Очистить',
         hint: 'Заполни <strong>два поля</strong> — третье посчитается само',
@@ -406,7 +415,9 @@ const I18N = {
         labelTotal: 'Total amount (100%)',
         labelPart: 'Part of total',
         labelPercent: 'Percent of total',
-        ofSize: 'of size',
+        sufTotal: (part, pc) => ` where ${part} is ${pc}%`,
+        sufPart: (pc, total) => ` ${pc}% of ${total}`,
+        sufPercent: (part, total) => ` ${part} of ${total}`,
         badge: 'Result',
         reset: 'Clear',
         hint: 'Fill <strong>any two fields</strong> — the third is computed for you',
@@ -507,7 +518,9 @@ function getUserFilled() {
 
 function clearComputed() {
     Object.values(fields).forEach(f => f.classList.remove('computed'));
+    document.getElementById('labelTotalSuffix').textContent = '';
     document.getElementById('labelPartSuffix').textContent = '';
+    document.getElementById('labelPercentSuffix').textContent = '';
 }
 
 function markComputed(id, value) {
@@ -546,16 +559,18 @@ function recalc() {
         if (pc === 0) { formula.textContent = T.errZeroPercent; return; }
         const val = p / pc * 100;
         markComputed('total', val);
+        document.getElementById('labelTotalSuffix').textContent = T.sufTotal(`${fmt(p)}${u}`, fmt(pc));
         formula.innerHTML = `<strong>${fmt(p)}${u}</strong> = <strong>${fmt(pc)}%</strong>  →  100% = <strong>${fmt(val)}${u}</strong>`;
     } else if (missing === 'part') {
         const val = t * pc / 100;
         markComputed('part', val);
-        document.getElementById('labelPartSuffix').textContent = ` ${T.ofSize} ${fmt(pc)}%`;
+        document.getElementById('labelPartSuffix').textContent = T.sufPart(fmt(pc), `${fmt(t)}${u}`);
         formula.innerHTML = `<strong>${fmt(pc)}%</strong> ${T.of} <strong>${fmt(t)}${u}</strong> = <strong>${fmt(val)}${u}</strong>`;
     } else if (missing === 'percent') {
         if (t === 0) { formula.textContent = T.errZeroTotal; return; }
         const val = p / t * 100;
         markComputed('percent', val);
+        document.getElementById('labelPercentSuffix').textContent = T.sufPercent(`${fmt(p)}${u}`, `${fmt(t)}${u}`);
         formula.innerHTML = `<strong>${fmt(p)}${u}</strong> ${T.from} <strong>${fmt(t)}${u}</strong> = <strong>${fmt(val)}%</strong>`;
     }
 }
