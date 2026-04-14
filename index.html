@@ -172,17 +172,80 @@ h1 {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.info {
-    margin-bottom: 1.25rem;
-    padding: 0.75rem 0.95rem;
-    background: rgba(108,92,231,0.08);
-    border: 1px solid rgba(162,155,254,0.18);
-    border-radius: 12px;
-    font-size: 0.82rem;
-    line-height: 1.5;
-    color: rgba(255,255,255,0.7);
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-left: 0.45rem;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #fdcb6e, #fd79a8);
+    border-radius: 50%;
+    cursor: pointer;
+    vertical-align: middle;
+    box-shadow: 0 2px 8px rgba(253,121,168,0.35);
+    transition: transform 0.2s ease;
 }
-.info strong { color: #a29bfe; font-weight: 600; }
+.info-icon:hover { transform: scale(1.15); }
+
+.modal[hidden] { display: none; }
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,26,0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: fadeIn 0.2s ease;
+}
+.modal-body {
+    position: relative;
+    max-width: 440px;
+    width: 100%;
+    padding: 1.6rem 1.5rem 1.4rem;
+    background: rgba(26,14,46,0.92);
+    border: 1px solid rgba(162,155,254,0.25);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: cardIn 0.25s cubic-bezier(.4,0,.2,1);
+}
+.modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.6rem;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+.modal-close:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.modal-text {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.85);
+    padding-right: 1rem;
+}
+.modal-text strong { color: #a29bfe; font-weight: 600; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .hint-top {
     text-align: center;
@@ -398,8 +461,16 @@ input:focus {
     <p class="subtitle" data-i18n="subtitle">Заполни любые два поля — третье посчитается автоматически</p>
 
     <div class="tabs" id="tabs">
-        <button class="tab-btn active" data-tab="calc1" data-i18n="tabCalc1">Процент от суммы</button>
-        <button class="tab-btn" data-tab="calc2" data-i18n="tabCalc2">Динамика в %</button>
+        <button class="tab-btn active" data-tab="calc1"><span data-i18n="tabCalc1">Процент от суммы</span><span class="info-icon" data-info="infoCalc1" title="?">i</span></button>
+        <button class="tab-btn" data-tab="calc2"><span data-i18n="tabCalc2">Динамика в %</span><span class="info-icon" data-info="infoCalc2" title="?">i</span></button>
+    </div>
+
+    <div class="modal" id="infoModal" hidden>
+        <div class="modal-backdrop"></div>
+        <div class="modal-body">
+            <button class="modal-close" id="infoClose" aria-label="close">×</button>
+            <div class="modal-text" id="infoText"></div>
+        </div>
     </div>
 
     <div class="units" id="units">
@@ -416,7 +487,6 @@ input:focus {
     </div>
 
     <div class="card calc active" id="calc1">
-        <div class="info" data-i18n="infoCalc1"></div>
         <div class="field" id="field-total">
             <label><span data-i18n="labelTotal">Полная сумма (100%)</span><span class="label-suffix" id="labelTotalSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
@@ -447,7 +517,6 @@ input:focus {
     </div>
 
     <div class="card calc" id="calc2">
-        <div class="info" data-i18n="infoCalc2"></div>
         <div class="field" id="field-initial">
             <label><span data-i18n="labelInitial">Изначальная сумма</span><span class="label-suffix" id="labelInitialSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
@@ -829,12 +898,31 @@ document.getElementById('reset2').addEventListener('click', () => {
 
 /* ── Tabs ── */
 document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+        if (e.target.classList.contains('info-icon')) return;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
         const target = btn.dataset.tab;
         document.querySelectorAll('.calc').forEach(c => c.classList.toggle('active', c.id === target));
     });
 });
+
+/* ── Info Modal ── */
+const infoModal = document.getElementById('infoModal');
+const infoText = document.getElementById('infoText');
+function openInfo(key) {
+    infoText.innerHTML = T[key] || '';
+    infoModal.hidden = false;
+}
+function closeInfo() { infoModal.hidden = true; }
+document.querySelectorAll('.info-icon').forEach(icon => {
+    icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openInfo(icon.dataset.info);
+    });
+});
+document.getElementById('infoClose').addEventListener('click', closeInfo);
+infoModal.querySelector('.modal-backdrop').addEventListener('click', closeInfo);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeInfo(); });
 
 applyLang();
 
