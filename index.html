@@ -493,7 +493,7 @@ const I18N = {
         tabCalc2: 'Изменение в %',
         labelInitial: 'Изначальная сумма',
         labelFinal: 'Конечная сумма',
-        labelChange: 'Изменение',
+        labelChange: '<span class="pct-sign">%</span> Изменение',
         phInitial: 'напр. 1000',
         phFinal: 'напр. 1120',
         phChange: 'напр. 12',
@@ -529,7 +529,7 @@ const I18N = {
         tabCalc2: '% Change',
         labelInitial: 'Initial amount',
         labelFinal: 'Final amount',
-        labelChange: 'Change',
+        labelChange: '<span class="pct-sign">%</span> Change',
         phInitial: 'e.g. 1000',
         phFinal: 'e.g. 1120',
         phChange: 'e.g. 12',
@@ -769,20 +769,23 @@ function recalc2() {
         if (i0 === 0) { formula2.textContent = T.errZeroInitial; return; }
         const val = (f0 - i0) / i0 * 100;
         markComputed2('change', val);
-        document.getElementById('labelChangeSuffix').textContent = T.sufChange(`${fmt(i0)}${u}`, `${fmt(f0)}${u}`);
+        const trend = val > 0 ? '📈 ' : val < 0 ? '📉 ' : '';
+        document.getElementById('labelChangeSuffix').innerHTML = ` ${trend}` + T.sufChange(`${fmt(i0)}${u}`, `${fmt(f0)}${u}`).trimStart();
         const sign = val >= 0 ? '+' : '';
         formula2.innerHTML = `<strong>${fmt(i0)}${u}</strong> → <strong>${fmt(f0)}${u}</strong> = <strong>${sign}${fmt(val)}%</strong>`;
     } else if (missing === 'final') {
         const val = i0 * (1 + ch / 100);
         markComputed2('final', val);
-        document.getElementById('labelFinalSuffix').textContent = T.sufFinal(`${fmt(i0)}${u}`, fmt(ch));
+        const trend = ch > 0 ? '📈 ' : ch < 0 ? '📉 ' : '';
+        document.getElementById('labelFinalSuffix').innerHTML = ` ${trend}` + T.sufFinal(`${fmt(i0)}${u}`, fmt(ch)).trimStart();
         const sign = ch >= 0 ? '+' : '';
         formula2.innerHTML = `<strong>${fmt(i0)}${u}</strong> ${sign}${fmt(ch)}% = <strong>${fmt(val)}${u}</strong>`;
     } else if (missing === 'initial') {
         if (ch === -100) { formula2.textContent = T.errInvalidChange; return; }
         const val = f0 / (1 + ch / 100);
         markComputed2('initial', val);
-        document.getElementById('labelInitialSuffix').textContent = T.sufInitial(`${fmt(f0)}${u}`, fmt(ch));
+        const trend = ch > 0 ? '📈 ' : ch < 0 ? '📉 ' : '';
+        document.getElementById('labelInitialSuffix').innerHTML = ` ${trend}` + T.sufInitial(`${fmt(f0)}${u}`, fmt(ch)).trimStart();
         const sign = ch >= 0 ? '+' : '';
         formula2.innerHTML = `<strong>${fmt(val)}${u}</strong> ${sign}${fmt(ch)}% = <strong>${fmt(f0)}${u}</strong>`;
     }
