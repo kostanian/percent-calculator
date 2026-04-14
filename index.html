@@ -165,6 +165,17 @@ h1 {
     color: #a29bfe;
 }
 
+.pct-sign {
+    display: inline-block;
+    font-weight: 800;
+    font-size: 1.15em;
+    background: linear-gradient(135deg, #fdcb6e, #fd79a8, #a29bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 0 0.1em;
+}
+
 .label-suffix {
     font-size: 0.78rem;
     color: rgba(255,255,255,0.55);
@@ -391,7 +402,7 @@ const I18N = {
         subtitle: 'Заполни любые два поля — третье посчитается автоматически',
         labelTotal: 'Полная сумма (100%)',
         labelPart: 'Часть от полной суммы',
-        labelPercent: 'Процент от полной суммы',
+        labelPercent: '<span class="pct-sign">%</span> от полной суммы',
         sufTotal: (part, pc) => ` (где ${part} является ${pc}%)`,
         sufPart: (pc, total) => ` (${pc}% от ${total})`,
         sufPercent: (part, total) => ` (${part} из ${total})`,
@@ -414,7 +425,7 @@ const I18N = {
         subtitle: 'Fill in any two fields — the third is computed automatically',
         labelTotal: 'Total amount (100%)',
         labelPart: 'Part of total',
-        labelPercent: 'Percent of total',
+        labelPercent: '<span class="pct-sign">%</span> of total',
         sufTotal: (part, pc) => ` (where ${part} is ${pc}%)`,
         sufPart: (pc, total) => ` (${pc}% of ${total})`,
         sufPercent: (part, total) => ` (${part} of ${total})`,
