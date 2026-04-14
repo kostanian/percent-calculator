@@ -37,6 +37,15 @@
 - Адаптивный дизайн — всё работает на телефонах.
 - Полностью клиентское приложение — без бэкенда и зависимостей.
 
+### 📱 Мобильная версия
+
+Приложение **адаптивное** и полностью рассчитано на работу с телефона. Можно добавить его на рабочий стол телефона и пользоваться как обычным приложением:
+
+1. Открой ссылку в браузере (Safari / Chrome).
+2. Нажми кнопку **«Поделиться»** (иконка квадрата со стрелкой).
+3. Выбери **«На экран "Домой"»** (iOS) или **«Добавить на главный экран»** (Android).
+4. Готово — иконка появится на рабочем столе, калькулятор будет открываться как нативное приложение, без адресной строки браузера. Работает оффлайн после первого открытия.
+
 ### Где применимо
 
 - **Финансы и покупки** — расчёт скидок, НДС, комиссий, чаевых, наценок и долей в счёте.
@@ -94,6 +103,15 @@ A modern web-based percent calculator with two modes, animated background, multi
 - Beautiful animated background with gradients and particles.
 - Responsive design — works great on phones.
 - Fully client-side — no backend, no dependencies.
+
+### 📱 Mobile
+
+The app is **fully responsive** and designed for phones. You can install it on your home screen and use it like a native app:
+
+1. Open the URL in your browser (Safari / Chrome).
+2. Tap the **Share** button (square-with-arrow icon).
+3. Choose **"Add to Home Screen"** (iOS / Android).
+4. Done — an icon appears on your home screen, and the calculator opens like a native app (no browser URL bar). Works offline after the first load.
 
 ### Use Cases
 
