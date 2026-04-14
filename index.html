@@ -85,6 +85,41 @@ h1 {
     font-size: 0.95rem;
 }
 
+/* ── Tabs ── */
+.tabs {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.35rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 0.6rem;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.tab-btn:hover { color: #fff; }
+.tab-btn.active {
+    background: linear-gradient(135deg, #00cec9, #6c5ce7);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(108,92,231,0.35);
+}
+
+.calc { display: none; }
+.calc.active { display: block; }
+
 /* ── Unit selector ── */
 .units {
     display: flex;
@@ -350,6 +385,11 @@ input:focus {
     <h1 data-i18n="title">Калькулятор %</h1>
     <p class="subtitle" data-i18n="subtitle">Заполни любые два поля — третье посчитается автоматически</p>
 
+    <div class="tabs" id="tabs">
+        <button class="tab-btn active" data-tab="calc1" data-i18n="tabCalc1">Процент от суммы</button>
+        <button class="tab-btn" data-tab="calc2" data-i18n="tabCalc2">Изменение в %</button>
+    </div>
+
     <div class="units" id="units">
         <button class="unit-btn active" data-unit="">—</button>
         <button class="unit-btn" data-unit="₽">₽</button>
@@ -363,7 +403,7 @@ input:focus {
         <button class="unit-btn" data-unit="л">л</button>
     </div>
 
-    <div class="card">
+    <div class="card calc active" id="calc1">
         <div class="field" id="field-total">
             <label><span data-i18n="labelTotal">Полная сумма (100%)</span><span class="label-suffix" id="labelTotalSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
@@ -392,6 +432,36 @@ input:focus {
 
         <button class="reset" id="reset" data-i18n="reset">Очистить</button>
     </div>
+
+    <div class="card calc" id="calc2">
+        <div class="field" id="field-initial">
+            <label><span data-i18n="labelInitial">Изначальная сумма</span><span class="label-suffix" id="labelInitialSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <div class="input-wrap">
+                <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="initial" placeholder="напр. 1000" data-i18n-ph="phInitial">
+                <span class="unit-label" data-for="initial"></span>
+            </div>
+        </div>
+
+        <div class="field" id="field-final">
+            <label><span data-i18n="labelFinal">Конечная сумма</span><span class="label-suffix" id="labelFinalSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <div class="input-wrap">
+                <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="final" placeholder="напр. 1120" data-i18n-ph="phFinal">
+                <span class="unit-label" data-for="final"></span>
+            </div>
+        </div>
+
+        <div class="field" id="field-change">
+            <label><span data-i18n="labelChange">Изменение</span><span class="label-suffix" id="labelChangeSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <div class="input-wrap">
+                <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="change" placeholder="напр. 12" data-i18n-ph="phChange">
+                <span class="unit-label" data-for="change">%</span>
+            </div>
+        </div>
+
+        <div class="formula" id="formula2" data-i18n="hint">Заполни <strong>два поля</strong> — третье посчитается само</div>
+
+        <button class="reset" id="reset2" data-i18n="reset">Очистить</button>
+    </div>
 </div>
 
 <script>
@@ -419,6 +489,19 @@ const I18N = {
         equalsPercent: 'равно',
         hundred: '100%',
         locale: 'ru-RU',
+        tabCalc1: 'Процент от суммы',
+        tabCalc2: 'Изменение в %',
+        labelInitial: 'Изначальная сумма',
+        labelFinal: 'Конечная сумма',
+        labelChange: 'Изменение',
+        phInitial: 'напр. 1000',
+        phFinal: 'напр. 1120',
+        phChange: 'напр. 12',
+        sufInitial: (final, ch) => ` (${final} при изменении ${ch}%)`,
+        sufFinal: (init, ch) => ` (${init} ${ch >= 0 ? '+' : ''}${ch}%)`,
+        sufChange: (init, final) => ` (${init} → ${final})`,
+        errZeroInitial: 'Изначальная сумма не может быть 0',
+        errInvalidChange: 'Изменение не может быть −100%',
     },
     en: {
         title: '% Calculator',
@@ -442,6 +525,19 @@ const I18N = {
         equalsPercent: 'equals',
         hundred: '100%',
         locale: 'en-US',
+        tabCalc1: 'Percent of amount',
+        tabCalc2: '% Change',
+        labelInitial: 'Initial amount',
+        labelFinal: 'Final amount',
+        labelChange: 'Change',
+        phInitial: 'e.g. 1000',
+        phFinal: 'e.g. 1120',
+        phChange: 'e.g. 12',
+        sufInitial: (final, ch) => ` (${final} with ${ch}% change)`,
+        sufFinal: (init, ch) => ` (${init} ${ch >= 0 ? '+' : ''}${ch}%)`,
+        sufChange: (init, final) => ` (${init} → ${final})`,
+        errZeroInitial: 'Initial amount cannot be 0',
+        errInvalidChange: 'Change cannot be −100%',
     },
 };
 
@@ -484,10 +580,11 @@ function applyLang() {
     document.querySelectorAll('.unit-btn').forEach(b => {
         b.textContent = unitDisplay(b.dataset.unit);
     });
-    document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"]').forEach(el => {
+    document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"], .unit-label[data-for="initial"], .unit-label[data-for="final"]').forEach(el => {
         el.textContent = unitDisplay(currentUnit);
     });
     recalc();
+    recalc2();
 }
 
 document.querySelectorAll('.lang button').forEach(btn => {
@@ -606,10 +703,11 @@ document.querySelectorAll('.unit-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b === btn));
         currentUnit = btn.dataset.unit;
-        document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"]').forEach(el => {
+        document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"], .unit-label[data-for="initial"], .unit-label[data-for="final"]').forEach(el => {
             el.textContent = unitDisplay(currentUnit);
         });
         recalc();
+        recalc2();
     });
 });
 
@@ -619,6 +717,102 @@ document.getElementById('reset').addEventListener('click', () => {
     inputOrder = [];
     clearComputed();
     formula.innerHTML = T.hint;
+});
+
+/* ── Calc2: Change Calculator ── */
+const initialEl = document.getElementById('initial');
+const finalEl = document.getElementById('final');
+const changeEl = document.getElementById('change');
+const inputs2 = [initialEl, finalEl, changeEl];
+const fields2 = {
+    initial: document.getElementById('field-initial'),
+    final: document.getElementById('field-final'),
+    change: document.getElementById('field-change'),
+};
+const formula2 = document.getElementById('formula2');
+let inputOrder2 = [];
+
+function clearComputed2() {
+    Object.values(fields2).forEach(f => f.classList.remove('computed'));
+    document.getElementById('labelInitialSuffix').textContent = '';
+    document.getElementById('labelFinalSuffix').textContent = '';
+    document.getElementById('labelChangeSuffix').textContent = '';
+}
+
+function markComputed2(id, value) {
+    clearComputed2();
+    fields2[id].classList.add('computed');
+    document.getElementById(id).value = Number.isFinite(value) ? (Math.round(value * 10000) / 10000) : '';
+}
+
+function recalc2() {
+    const manualIds = inputOrder2.filter(id => {
+        const el = document.getElementById(id);
+        return el.value !== '' && isFinite(pf(el.value));
+    });
+    const active = manualIds.slice(-2);
+    clearComputed2();
+
+    if (active.length < 2) {
+        formula2.innerHTML = T.hint;
+        return;
+    }
+
+    const i0 = pf(initialEl.value);
+    const f0 = pf(finalEl.value);
+    const ch = pf(changeEl.value);
+
+    const missing = ['initial','final','change'].find(id => !active.includes(id));
+    const u = currentUnit ? ' ' + unitDisplay(currentUnit) : '';
+
+    if (missing === 'change') {
+        if (i0 === 0) { formula2.textContent = T.errZeroInitial; return; }
+        const val = (f0 - i0) / i0 * 100;
+        markComputed2('change', val);
+        document.getElementById('labelChangeSuffix').textContent = T.sufChange(`${fmt(i0)}${u}`, `${fmt(f0)}${u}`);
+        const sign = val >= 0 ? '+' : '';
+        formula2.innerHTML = `<strong>${fmt(i0)}${u}</strong> → <strong>${fmt(f0)}${u}</strong> = <strong>${sign}${fmt(val)}%</strong>`;
+    } else if (missing === 'final') {
+        const val = i0 * (1 + ch / 100);
+        markComputed2('final', val);
+        document.getElementById('labelFinalSuffix').textContent = T.sufFinal(`${fmt(i0)}${u}`, fmt(ch));
+        const sign = ch >= 0 ? '+' : '';
+        formula2.innerHTML = `<strong>${fmt(i0)}${u}</strong> ${sign}${fmt(ch)}% = <strong>${fmt(val)}${u}</strong>`;
+    } else if (missing === 'initial') {
+        if (ch === -100) { formula2.textContent = T.errInvalidChange; return; }
+        const val = f0 / (1 + ch / 100);
+        markComputed2('initial', val);
+        document.getElementById('labelInitialSuffix').textContent = T.sufInitial(`${fmt(f0)}${u}`, fmt(ch));
+        const sign = ch >= 0 ? '+' : '';
+        formula2.innerHTML = `<strong>${fmt(val)}${u}</strong> ${sign}${fmt(ch)}% = <strong>${fmt(f0)}${u}</strong>`;
+    }
+}
+
+inputs2.forEach(inp => {
+    inp.addEventListener('input', () => {
+        const cleaned = inp.value.replace(/[^0-9.,\-]/g, '').replace(/(,.*?)[,.]/g, '$1').replace(/(\..*?)[,.]/g, '$1');
+        if (cleaned !== inp.value) inp.value = cleaned;
+        fields2[inp.id].classList.remove('computed');
+        inputOrder2 = inputOrder2.filter(id => id !== inp.id);
+        if (inp.value !== '') inputOrder2.push(inp.id);
+        recalc2();
+    });
+});
+
+document.getElementById('reset2').addEventListener('click', () => {
+    inputs2.forEach(i => i.value = '');
+    inputOrder2 = [];
+    clearComputed2();
+    formula2.innerHTML = T.hint;
+});
+
+/* ── Tabs ── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.calc').forEach(c => c.classList.toggle('active', c.id === target));
+    });
 });
 
 applyLang();
