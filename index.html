@@ -172,6 +172,18 @@ h1 {
     to { opacity: 1; transform: translateY(0); }
 }
 
+.info {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 0.95rem;
+    background: rgba(108,92,231,0.08);
+    border: 1px solid rgba(162,155,254,0.18);
+    border-radius: 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.7);
+}
+.info strong { color: #a29bfe; font-weight: 600; }
+
 .hint-top {
     text-align: center;
     font-size: 0.85rem;
@@ -387,7 +399,7 @@ input:focus {
 
     <div class="tabs" id="tabs">
         <button class="tab-btn active" data-tab="calc1" data-i18n="tabCalc1">Процент от суммы</button>
-        <button class="tab-btn" data-tab="calc2" data-i18n="tabCalc2">Изменение в %</button>
+        <button class="tab-btn" data-tab="calc2" data-i18n="tabCalc2">Динамика в %</button>
     </div>
 
     <div class="units" id="units">
@@ -404,6 +416,7 @@ input:focus {
     </div>
 
     <div class="card calc active" id="calc1">
+        <div class="info" data-i18n="infoCalc1"></div>
         <div class="field" id="field-total">
             <label><span data-i18n="labelTotal">Полная сумма (100%)</span><span class="label-suffix" id="labelTotalSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
@@ -434,6 +447,7 @@ input:focus {
     </div>
 
     <div class="card calc" id="calc2">
+        <div class="info" data-i18n="infoCalc2"></div>
         <div class="field" id="field-initial">
             <label><span data-i18n="labelInitial">Изначальная сумма</span><span class="label-suffix" id="labelInitialSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
@@ -490,7 +504,9 @@ const I18N = {
         hundred: '100%',
         locale: 'ru-RU',
         tabCalc1: 'Процент от суммы',
-        tabCalc2: 'Изменение в %',
+        tabCalc2: 'Динамика в %',
+        infoCalc1: 'Находит часть, полную сумму или процент. Укажи любые <strong>два</strong> значения — третье посчитается само. Например: «сколько 30% от 12 400» или «2700 — это какой процент от 12 400».',
+        infoCalc2: 'Вычисляет процент роста или падения между двумя значениями. Укажи любые <strong>два</strong> из трёх: изначальная сумма, конечная сумма, изменение (%). Например: было 1000, стало 1120 — рост на 12%.',
         labelInitial: 'Изначальная сумма',
         labelFinal: 'Конечная сумма',
         labelChange: '<span class="pct-sign">%</span> Изменение',
@@ -526,7 +542,9 @@ const I18N = {
         hundred: '100%',
         locale: 'en-US',
         tabCalc1: 'Percent of amount',
-        tabCalc2: '% Change',
+        tabCalc2: '% Dynamics',
+        infoCalc1: 'Finds the part, the total, or the percent. Enter any <strong>two</strong> values — the third is computed for you. E.g. "what is 30% of 12,400" or "2700 is what percent of 12,400".',
+        infoCalc2: 'Computes the percent change between two values (growth or drop). Enter any <strong>two</strong> of three: initial amount, final amount, change (%). E.g. was 1000, became 1120 → +12% increase.',
         labelInitial: 'Initial amount',
         labelFinal: 'Final amount',
         labelChange: '<span class="pct-sign">%</span> Change',
