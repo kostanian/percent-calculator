@@ -37,6 +37,18 @@
 - Адаптивный дизайн — всё работает на телефонах.
 - Полностью клиентское приложение — без бэкенда и зависимостей.
 
+### Где применимо
+
+- **Финансы и покупки** — расчёт скидок, НДС, комиссий, чаевых, наценок и долей в счёте.
+- **Зарплата и налоги** — процент от оклада, премии, удержания, подоходный налог.
+- **Инвестиции и бизнес** — доходность, рост выручки, изменение курсов валют и акций, KPI.
+- **Аналитика и отчёты** — динамика метрик «было → стало» (посетители, продажи, цены).
+- **Кредиты и депозиты** — ежемесячные проценты, переплата, эффективная ставка.
+- **Учёба и статистика** — доля правильных ответов, распределение данных, задачи по математике.
+- **Здоровье и питание** — процент жира, БЖУ от суточной нормы, прогресс веса.
+- **Ремонт и стройка** — расчёт количества материалов, запасы, расход по площади.
+- **Маркетинг и продажи** — конверсия, CTR, ROI, прирост аудитории.
+
 ### Технологии
 
 - HTML5 · CSS3 (анимации, градиенты, backdrop-filter) · Vanilla JavaScript
@@ -82,6 +94,18 @@ A modern web-based percent calculator with two modes, animated background, multi
 - Beautiful animated background with gradients and particles.
 - Responsive design — works great on phones.
 - Fully client-side — no backend, no dependencies.
+
+### Use Cases
+
+- **Finance & shopping** — discounts, VAT/sales tax, fees, tips, markups, split bills.
+- **Salary & taxes** — percent of base pay, bonuses, withholdings, income tax.
+- **Investments & business** — yields, revenue growth, FX/stock change, KPIs.
+- **Analytics & reporting** — before → after metric dynamics (traffic, sales, prices).
+- **Loans & deposits** — monthly interest, total overpayment, effective rate.
+- **Education & stats** — grading percentages, data distributions, math homework.
+- **Health & nutrition** — body fat %, macros vs daily intake, weight progress.
+- **Home improvement** — materials quantity, reserves, usage per area.
+- **Marketing & sales** — conversion, CTR, ROI, audience growth.
 
 ### Tech Stack
 
