@@ -421,6 +421,23 @@ const I18N = {
     },
 };
 
+const UNIT_LABELS = {
+    '':   { ru: '—',  en: '—'   },
+    '₽':  { ru: '₽',  en: '₽'   },
+    '$':  { ru: '$',  en: '$'   },
+    '€':  { ru: '€',  en: '€'   },
+    'кг': { ru: 'кг', en: 'kg'  },
+    'г':  { ru: 'г',  en: 'g'   },
+    'м':  { ru: 'м',  en: 'm'   },
+    'км': { ru: 'км', en: 'km'  },
+    'шт': { ru: 'шт', en: 'pcs' },
+    'л':  { ru: 'л',  en: 'l'   },
+};
+function unitDisplay(key) {
+    const entry = UNIT_LABELS[key];
+    return entry ? entry[LANG] : key;
+}
+
 let LANG = localStorage.getItem('lang');
 if (!I18N[LANG]) LANG = 'ru';
 let T = I18N[LANG];
@@ -439,6 +456,12 @@ function applyLang() {
     });
     document.querySelectorAll('.lang button').forEach(b => {
         b.classList.toggle('active', b.dataset.lang === LANG);
+    });
+    document.querySelectorAll('.unit-btn').forEach(b => {
+        b.textContent = unitDisplay(b.dataset.unit);
+    });
+    document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"]').forEach(el => {
+        el.textContent = unitDisplay(currentUnit);
     });
     recalc();
 }
@@ -512,7 +535,7 @@ function recalc() {
 
     const missing = ['total','part','percent'].find(id => !active.includes(id));
 
-    const u = currentUnit ? ' ' + currentUnit : '';
+    const u = currentUnit ? ' ' + unitDisplay(currentUnit) : '';
 
     if (missing === 'total') {
         if (pc === 0) { formula.textContent = T.errZeroPercent; return; }
@@ -550,7 +573,7 @@ document.querySelectorAll('.unit-btn').forEach(btn => {
         document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b === btn));
         currentUnit = btn.dataset.unit;
         document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"]').forEach(el => {
-            el.textContent = currentUnit;
+            el.textContent = unitDisplay(currentUnit);
         });
         recalc();
     });
@@ -561,7 +584,7 @@ document.getElementById('reset').addEventListener('click', () => {
     inputs.forEach(i => i.value = '');
     inputOrder = [];
     clearComputed();
-    formula.innerHTML = 'Заполни <strong>два поля</strong> — третье посчитается само';
+    formula.innerHTML = T.hint;
 });
 
 applyLang();
