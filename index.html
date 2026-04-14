@@ -349,7 +349,7 @@ input:focus {
         <div class="field" id="field-total">
             <label><span data-i18n="labelTotal">Полная сумма (100%)</span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
-                <input type="number" id="total" placeholder="напр. 12400" step="any" data-i18n-ph="phTotal">
+                <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="total" placeholder="напр. 12400" step="any" data-i18n-ph="phTotal">
                 <span class="unit-label" data-for="total"></span>
             </div>
         </div>
@@ -357,7 +357,7 @@ input:focus {
         <div class="field" id="field-part">
             <label><span data-i18n="labelPart">Часть</span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
-                <input type="number" id="part" placeholder="напр. 2700" step="any" data-i18n-ph="phPart">
+                <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="part" placeholder="напр. 2700" step="any" data-i18n-ph="phPart">
                 <span class="unit-label" data-for="part"></span>
             </div>
         </div>
@@ -365,7 +365,7 @@ input:focus {
         <div class="field" id="field-percent">
             <label><span data-i18n="labelPercent">Процент</span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
-                <input type="number" id="percent" placeholder="напр. 30" step="any" data-i18n-ph="phPercent">
+                <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="percent" placeholder="напр. 30" step="any" data-i18n-ph="phPercent">
                 <span class="unit-label" data-for="percent">%</span>
             </div>
         </div>
@@ -490,6 +490,8 @@ let inputOrder = [];
 
 let currentUnit = '';
 
+function pf(v) { return parseFloat(String(v).replace(',', '.')); }
+
 function fmt(n) {
     if (!isFinite(n)) return '—';
     const rounded = Math.round(n * 10000) / 10000;
@@ -498,7 +500,7 @@ function fmt(n) {
 
 function getUserFilled() {
     // Values typed by user — fields not marked as "computed"
-    return inputs.filter(i => !fields[i.id].classList.contains('computed') && i.value !== '' && isFinite(parseFloat(i.value)));
+    return inputs.filter(i => !fields[i.id].classList.contains('computed') && i.value !== '' && isFinite(pf(i.value)));
 }
 
 function clearComputed() {
@@ -515,7 +517,7 @@ function recalc() {
     // Determine which two the user has filled (manual entries), then compute the third.
     const manualIds = inputOrder.filter(id => {
         const el = document.getElementById(id);
-        return el.value !== '' && isFinite(parseFloat(el.value));
+        return el.value !== '' && isFinite(pf(el.value));
     });
 
     // Keep only the two most recent manual entries
@@ -529,9 +531,9 @@ function recalc() {
         return;
     }
 
-    const t = parseFloat(totalEl.value);
-    const p = parseFloat(partEl.value);
-    const pc = parseFloat(percentEl.value);
+    const t = pf(totalEl.value);
+    const p = pf(partEl.value);
+    const pc = pf(percentEl.value);
 
     const missing = ['total','part','percent'].find(id => !active.includes(id));
 
@@ -556,6 +558,8 @@ function recalc() {
 
 inputs.forEach(inp => {
     inp.addEventListener('input', () => {
+        const cleaned = inp.value.replace(/[^0-9.,\-]/g, '').replace(/(,.*?)[,.]/g, '$1').replace(/(\..*?)[,.]/g, '$1');
+        if (cleaned !== inp.value) inp.value = cleaned;
         // If this field was computed, the user is overriding it
         fields[inp.id].classList.remove('computed');
 
