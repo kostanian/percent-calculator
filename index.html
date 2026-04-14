@@ -394,7 +394,7 @@ const I18N = {
         labelPercent: 'Процент от полной суммы',
         sufTotal: (part, pc) => ` (где ${part} является ${pc}%)`,
         sufPart: (pc, total) => ` (${pc}% от ${total})`,
-        sufPercent: (part, total) => ` (${part}% из ${total})`,
+        sufPercent: (part, total) => ` (${part} из ${total})`,
         badge: 'Результат',
         reset: 'Очистить',
         hint: 'Заполни <strong>два поля</strong> — третье посчитается само',
@@ -417,7 +417,7 @@ const I18N = {
         labelPercent: 'Percent of total',
         sufTotal: (part, pc) => ` (where ${part} is ${pc}%)`,
         sufPart: (pc, total) => ` (${pc}% of ${total})`,
-        sufPercent: (part, total) => ` (${part}% of ${total})`,
+        sufPercent: (part, total) => ` (${part} of ${total})`,
         badge: 'Result',
         reset: 'Clear',
         hint: 'Fill <strong>any two fields</strong> — the third is computed for you',
@@ -570,7 +570,7 @@ function recalc() {
         if (t === 0) { formula.textContent = T.errZeroTotal; return; }
         const val = p / t * 100;
         markComputed('percent', val);
-        document.getElementById('labelPercentSuffix').textContent = T.sufPercent(fmt(p), `${fmt(t)}${u}`);
+        document.getElementById('labelPercentSuffix').textContent = T.sufPercent(`${fmt(p)}${u}`, `${fmt(t)}${u}`);
         formula.innerHTML = `<strong>${fmt(p)}${u}</strong> ${T.from} <strong>${fmt(t)}${u}</strong> = <strong>${fmt(val)}%</strong>`;
     }
 }
