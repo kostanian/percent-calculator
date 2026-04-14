@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор процентов</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a1a;
+    color: #fff;
+    overflow-x: hidden;
+    padding: 2rem 1rem;
+}
+
+/* ── Animated background ── */
+.bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 25%, #0a1628 50%, #0a0a1a 100%);
+    background-size: 400% 400%;
+    animation: bgShift 15s ease infinite;
+}
+@keyframes bgShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    z-index: 0;
+    transition: transform 1.5s cubic-bezier(.4,0,.2,1);
+}
+.orb-1 { width: 500px; height: 500px; background: #6c5ce7; top: -10%; left: -10%; animation: float1 12s ease-in-out infinite; }
+.orb-2 { width: 400px; height: 400px; background: #00cec9; bottom: -10%; right: -10%; animation: float2 10s ease-in-out infinite; }
+.orb-3 { width: 350px; height: 350px; background: #fd79a8; top: 50%; left: 50%; animation: float3 14s ease-in-out infinite; }
+
+@keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(80px,60px) scale(1.1); } }
+@keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px,-80px) scale(1.15); } }
+@keyframes float3 { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-40%,-60%) scale(1.2); } }
+
+#particles { position: fixed; inset: 0; z-index: 0; }
+
+/* ── Container ── */
+.app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+}
+
+h1 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 0.3em;
+    background: linear-gradient(135deg, #a29bfe, #fd79a8, #fdcb6e);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradText 4s ease infinite;
+}
+@keyframes gradText {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.subtitle {
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 1.75rem;
+    font-size: 0.95rem;
+}
+
+/* ── Unit selector ── */
+.units {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.35rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    flex-wrap: wrap;
+}
+
+.unit-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 0.65rem 0.5rem;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+.unit-btn:hover { color: rgba(255,255,255,0.9); }
+.unit-btn.active {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(108,92,231,0.35);
+}
+
+/* ── Card ── */
+.card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    padding: 2rem;
+    animation: cardIn 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hint-top {
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.02em;
+}
+
+.field {
+    margin-bottom: 1.1rem;
+    transition: opacity 0.3s ease;
+}
+
+.field label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+}
+
+.field.computed label {
+    color: #a29bfe;
+}
+
+.badge {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.5rem;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+}
+.field.computed .badge { opacity: 1; transform: scale(1); }
+
+.input-wrap {
+    position: relative;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 1rem 3.2rem 1rem 1.2rem;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.3s ease;
+    -moz-appearance: textfield;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+input:focus {
+    border-color: #a29bfe;
+    background: rgba(255,255,255,0.07);
+    box-shadow: 0 0 0 4px rgba(162,155,254,0.15);
+}
+
+.field.computed input {
+    border-color: rgba(162,155,254,0.4);
+    background: linear-gradient(135deg, rgba(108,92,231,0.12), rgba(162,155,254,0.06));
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.35rem;
+}
+.field.computed input::placeholder { color: rgba(255,255,255,0.25); }
+
+.unit-label {
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.45);
+    font-weight: 500;
+    pointer-events: none;
+    font-size: 1rem;
+}
+
+.reset {
+    display: block;
+    margin: 1.5rem auto 0;
+    padding: 0.8rem 2rem;
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 6px 20px rgba(232,67,147,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(232,67,147,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+    filter: brightness(1.1);
+}
+.reset:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 14px rgba(232,67,147,0.4);
+}
+
+.formula {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.08);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.5;
+}
+.formula strong { color: #a29bfe; font-weight: 600; }
+
+/* ── Language switcher ── */
+.lang {
+    position: fixed;
+    top: 1.2rem;
+    right: 1.2rem;
+    z-index: 10;
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+.lang button {
+    padding: 0.4rem 0.7rem;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.55);
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.lang button:hover { color: #fff; }
+.lang button.active {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(108,92,231,0.35);
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<canvas id="particles"></canvas>
+
+<div class="lang" id="lang">
+    <button data-lang="ru" class="active">RU</button>
+    <button data-lang="en">EN</button>
+</div>
+
+<div class="app">
+    <h1 data-i18n="title">Калькулятор %</h1>
+    <p class="subtitle" data-i18n="subtitle">Заполни любые два поля — третье посчитается автоматически</p>
+
+    <div class="units" id="units">
+        <button class="unit-btn active" data-unit="">—</button>
+        <button class="unit-btn" data-unit="₽">₽</button>
+        <button class="unit-btn" data-unit="$">$</button>
+        <button class="unit-btn" data-unit="€">€</button>
+        <button class="unit-btn" data-unit="кг">кг</button>
+        <button class="unit-btn" data-unit="г">г</button>
+        <button class="unit-btn" data-unit="м">м</button>
+        <button class="unit-btn" data-unit="км">км</button>
+        <button class="unit-btn" data-unit="шт">шт</button>
+        <button class="unit-btn" data-unit="л">л</button>
+    </div>
+
+    <div class="card">
+        <div class="field" id="field-total">
+            <label><span data-i18n="labelTotal">Полная сумма (100%)</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <div class="input-wrap">
+                <input type="number" id="total" placeholder="напр. 12400" step="any" data-i18n-ph="phTotal">
+                <span class="unit-label" data-for="total"></span>
+            </div>
+        </div>
+
+        <div class="field" id="field-part">
+            <label><span data-i18n="labelPart">Часть</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <div class="input-wrap">
+                <input type="number" id="part" placeholder="напр. 2700" step="any" data-i18n-ph="phPart">
+                <span class="unit-label" data-for="part"></span>
+            </div>
+        </div>
+
+        <div class="field" id="field-percent">
+            <label><span data-i18n="labelPercent">Процент</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <div class="input-wrap">
+                <input type="number" id="percent" placeholder="напр. 30" step="any" data-i18n-ph="phPercent">
+                <span class="unit-label" data-for="percent">%</span>
+            </div>
+        </div>
+
+        <div class="formula" id="formula" data-i18n="hint">Заполни <strong>два поля</strong> — третье посчитается само</div>
+
+        <button class="reset" id="reset" data-i18n="reset">Очистить</button>
+    </div>
+</div>
+
+<script>
+/* ── i18n ── */
+const I18N = {
+    ru: {
+        title: 'Калькулятор %',
+        subtitle: 'Заполни любые два поля — третье посчитается автоматически',
+        labelTotal: 'Полная сумма (100%)',
+        labelPart: 'Часть',
+        labelPercent: 'Процент',
+        badge: 'Результат',
+        reset: 'Очистить',
+        hint: 'Заполни <strong>два поля</strong> — третье посчитается само',
+        phTotal: 'напр. 12400',
+        phPart: 'напр. 2700',
+        phPercent: 'напр. 30',
+        errZeroPercent: 'Процент не может быть 0',
+        errZeroTotal: 'Полная сумма не может быть 0',
+        of: 'от',
+        from: 'из',
+        equalsPercent: 'равно',
+        hundred: '100%',
+        locale: 'ru-RU',
+    },
+    en: {
+        title: '% Calculator',
+        subtitle: 'Fill in any two fields — the third is computed automatically',
+        labelTotal: 'Total amount (100%)',
+        labelPart: 'Part',
+        labelPercent: 'Percent',
+        badge: 'Result',
+        reset: 'Clear',
+        hint: 'Fill <strong>any two fields</strong> — the third is computed for you',
+        phTotal: 'e.g. 12400',
+        phPart: 'e.g. 2700',
+        phPercent: 'e.g. 30',
+        errZeroPercent: 'Percent cannot be 0',
+        errZeroTotal: 'Total cannot be 0',
+        of: 'of',
+        from: 'of',
+        equalsPercent: 'equals',
+        hundred: '100%',
+        locale: 'en-US',
+    },
+};
+
+let LANG = localStorage.getItem('lang');
+if (!I18N[LANG]) LANG = 'ru';
+let T = I18N[LANG];
+
+function applyLang() {
+    T = I18N[LANG];
+    document.documentElement.lang = LANG;
+    document.title = T.title;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (T[key] !== undefined) el.innerHTML = T[key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.dataset.i18nPh;
+        if (T[key] !== undefined) el.placeholder = T[key];
+    });
+    document.querySelectorAll('.lang button').forEach(b => {
+        b.classList.toggle('active', b.dataset.lang === LANG);
+    });
+    recalc();
+}
+
+document.querySelectorAll('.lang button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        LANG = btn.dataset.lang;
+        localStorage.setItem('lang', LANG);
+        applyLang();
+    });
+});
+
+const totalEl = document.getElementById('total');
+const partEl = document.getElementById('part');
+const percentEl = document.getElementById('percent');
+const inputs = [totalEl, partEl, percentEl];
+const fields = {
+    total: document.getElementById('field-total'),
+    part: document.getElementById('field-part'),
+    percent: document.getElementById('field-percent'),
+};
+const formula = document.getElementById('formula');
+
+// Track order of user input (most-recent last). When 2 filled, compute the 3rd.
+let inputOrder = [];
+
+let currentUnit = '';
+
+function fmt(n) {
+    if (!isFinite(n)) return '—';
+    const rounded = Math.round(n * 10000) / 10000;
+    return rounded.toLocaleString(T.locale, { maximumFractionDigits: 4 });
+}
+
+function getUserFilled() {
+    // Values typed by user — fields not marked as "computed"
+    return inputs.filter(i => !fields[i.id].classList.contains('computed') && i.value !== '' && isFinite(parseFloat(i.value)));
+}
+
+function clearComputed() {
+    Object.values(fields).forEach(f => f.classList.remove('computed'));
+}
+
+function markComputed(id, value) {
+    clearComputed();
+    fields[id].classList.add('computed');
+    document.getElementById(id).value = Number.isFinite(value) ? (Math.round(value * 10000) / 10000) : '';
+}
+
+function recalc() {
+    // Determine which two the user has filled (manual entries), then compute the third.
+    const manualIds = inputOrder.filter(id => {
+        const el = document.getElementById(id);
+        return el.value !== '' && isFinite(parseFloat(el.value));
+    });
+
+    // Keep only the two most recent manual entries
+    const active = manualIds.slice(-2);
+
+    // Clear previous computed marking
+    clearComputed();
+
+    if (active.length < 2) {
+        formula.innerHTML = T.hint;
+        return;
+    }
+
+    const t = parseFloat(totalEl.value);
+    const p = parseFloat(partEl.value);
+    const pc = parseFloat(percentEl.value);
+
+    const missing = ['total','part','percent'].find(id => !active.includes(id));
+
+    const u = currentUnit ? ' ' + currentUnit : '';
+
+    if (missing === 'total') {
+        if (pc === 0) { formula.textContent = T.errZeroPercent; return; }
+        const val = p / pc * 100;
+        markComputed('total', val);
+        formula.innerHTML = `<strong>${fmt(p)}${u}</strong> = <strong>${fmt(pc)}%</strong>  →  100% = <strong>${fmt(val)}${u}</strong>`;
+    } else if (missing === 'part') {
+        const val = t * pc / 100;
+        markComputed('part', val);
+        formula.innerHTML = `<strong>${fmt(pc)}%</strong> ${T.of} <strong>${fmt(t)}${u}</strong> = <strong>${fmt(val)}${u}</strong>`;
+    } else if (missing === 'percent') {
+        if (t === 0) { formula.textContent = T.errZeroTotal; return; }
+        const val = p / t * 100;
+        markComputed('percent', val);
+        formula.innerHTML = `<strong>${fmt(p)}${u}</strong> ${T.from} <strong>${fmt(t)}${u}</strong> = <strong>${fmt(val)}%</strong>`;
+    }
+}
+
+inputs.forEach(inp => {
+    inp.addEventListener('input', () => {
+        // If this field was computed, the user is overriding it
+        fields[inp.id].classList.remove('computed');
+
+        // Move this id to the end of the order list
+        inputOrder = inputOrder.filter(id => id !== inp.id);
+        if (inp.value !== '') inputOrder.push(inp.id);
+
+        recalc();
+    });
+});
+
+/* ── Units ── */
+document.querySelectorAll('.unit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.unit-btn').forEach(b => b.classList.toggle('active', b === btn));
+        currentUnit = btn.dataset.unit;
+        document.querySelectorAll('.unit-label[data-for="total"], .unit-label[data-for="part"]').forEach(el => {
+            el.textContent = currentUnit;
+        });
+        recalc();
+    });
+});
+
+/* ── Reset ── */
+document.getElementById('reset').addEventListener('click', () => {
+    inputs.forEach(i => i.value = '');
+    inputOrder = [];
+    clearComputed();
+    formula.innerHTML = 'Заполни <strong>два поля</strong> — третье посчитается само';
+});
+
+applyLang();
+
+/* ── Particles ── */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W, H;
+const dots = [];
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+resize();
+addEventListener('resize', resize);
+
+for (let i = 0; i < 70; i++) {
+    dots.push({
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 0.4
+    });
+}
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (const d of dots) {
+        d.x += d.vx; d.y += d.vy;
+        if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
+        if (d.y < 0) d.y = H; if (d.y > H) d.y = 0;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fill();
+    }
+    for (let i = 0; i < dots.length; i++) {
+        for (let j = i + 1; j < dots.length; j++) {
+            const dx = dots[i].x - dots[j].x, dy = dots[i].y - dots[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 130) {
+                ctx.beginPath();
+                ctx.moveTo(dots[i].x, dots[i].y);
+                ctx.lineTo(dots[j].x, dots[j].y);
+                ctx.strokeStyle = `rgba(255,255,255,${0.06 * (1 - dist/130)})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        }
+    }
+    requestAnimationFrame(draw);
+}
+draw();
+
+/* ── Mouse parallax ── */
+addEventListener('mousemove', e => {
+    const mx = (e.clientX / innerWidth - 0.5) * 2;
+    const my = (e.clientY / innerHeight - 0.5) * 2;
+    document.querySelector('.orb-1').style.transform = `translate(${mx*30}px, ${my*20}px)`;
+    document.querySelector('.orb-2').style.transform = `translate(${mx*-20}px, ${my*-30}px)`;
+    document.querySelector('.orb-3').style.transform = `translate(calc(-50% + ${mx*15}px), calc(-50% + ${my*15}px))`;
+});
+</script>
+</body>
+</html>
