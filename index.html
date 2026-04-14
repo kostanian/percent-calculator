@@ -355,7 +355,7 @@ input:focus {
         </div>
 
         <div class="field" id="field-part">
-            <label><span data-i18n="labelPart">Часть</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <label><span data-i18n="labelPart">Часть от полной суммы</span><span class="label-suffix" id="labelPartSuffix"></span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
                 <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="part" placeholder="напр. 2700" step="any" data-i18n-ph="phPart">
                 <span class="unit-label" data-for="part"></span>
@@ -363,7 +363,7 @@ input:focus {
         </div>
 
         <div class="field" id="field-percent">
-            <label><span data-i18n="labelPercent">Процент</span> <span class="badge" data-i18n="badge">Результат</span></label>
+            <label><span data-i18n="labelPercent">Процент от полной суммы</span> <span class="badge" data-i18n="badge">Результат</span></label>
             <div class="input-wrap">
                 <input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="percent" placeholder="напр. 30" step="any" data-i18n-ph="phPercent">
                 <span class="unit-label" data-for="percent">%</span>
@@ -383,8 +383,9 @@ const I18N = {
         title: 'Калькулятор %',
         subtitle: 'Заполни любые два поля — третье посчитается автоматически',
         labelTotal: 'Полная сумма (100%)',
-        labelPart: 'Часть',
-        labelPercent: 'Процент',
+        labelPart: 'Часть от полной суммы',
+        labelPercent: 'Процент от полной суммы',
+        ofSize: 'размером',
         badge: 'Результат',
         reset: 'Очистить',
         hint: 'Заполни <strong>два поля</strong> — третье посчитается само',
@@ -403,8 +404,9 @@ const I18N = {
         title: '% Calculator',
         subtitle: 'Fill in any two fields — the third is computed automatically',
         labelTotal: 'Total amount (100%)',
-        labelPart: 'Part',
-        labelPercent: 'Percent',
+        labelPart: 'Part of total',
+        labelPercent: 'Percent of total',
+        ofSize: 'of size',
         badge: 'Result',
         reset: 'Clear',
         hint: 'Fill <strong>any two fields</strong> — the third is computed for you',
@@ -505,6 +507,7 @@ function getUserFilled() {
 
 function clearComputed() {
     Object.values(fields).forEach(f => f.classList.remove('computed'));
+    document.getElementById('labelPartSuffix').textContent = '';
 }
 
 function markComputed(id, value) {
@@ -547,6 +550,7 @@ function recalc() {
     } else if (missing === 'part') {
         const val = t * pc / 100;
         markComputed('part', val);
+        document.getElementById('labelPartSuffix').textContent = ` ${T.ofSize} ${fmt(pc)}%`;
         formula.innerHTML = `<strong>${fmt(pc)}%</strong> ${T.of} <strong>${fmt(t)}${u}</strong> = <strong>${fmt(val)}${u}</strong>`;
     } else if (missing === 'percent') {
         if (t === 0) { formula.textContent = T.errZeroTotal; return; }
